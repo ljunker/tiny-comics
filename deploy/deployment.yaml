@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comics
+spec:
+  selector:
+    matchLabels:
+      app: comics
+  template:
+    metadata:
+      labels:
+        app: comics
+    spec:
+      # If your storage needs a specific fsGroup to allow writes, set it here
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: web
+          # Use your image name here (the uv-based image we built earlier)
+          image: tiny-comics:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PORT
+              value: "5000"
+          ports:
+            - containerPort: 5000
+          volumeMounts:
+            - name: comics
+              mountPath: /app/static/comics
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 2
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: comics
+          persistentVolumeClaim:
+            claimName: comics-pvc
