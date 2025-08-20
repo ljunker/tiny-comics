@@ -43,6 +43,7 @@ spec:
             - { name: GITSYNC_PERIOD,   value: "60s" }     # sync every 60s
             - { name: GITSYNC_DEPTH,  value: "1" }
             - { name: GITSYNC_ONE_TIME, value: "false" }
+            - { name: GITSYNC_ADD_USER, value: "true" }
           volumeMounts:
             - name: repo
               mountPath: /repo
