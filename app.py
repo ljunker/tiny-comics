@@ -4,7 +4,7 @@ from pathlib import Path
 from flask import Flask, abort, render_template_string, url_for
 
 app = Flask(__name__)
-COMICS_DIR = Path("static/comics")
+COMICS_DIR = Path(os.getenv("COMICS_DIR", "static/comics"))
 IMG_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
 
 def list_comics():

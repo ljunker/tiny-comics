@@ -21,13 +21,14 @@ spec:
         - name: web
           image: tiny-comics:latest
           imagePullPolicy: IfNotPresent
-          env: [{ name: PORT, value: "5000" }]
+          env:
+            - { name: PORT, value: "5000" }
+            - { name: COMICS_DIR, value: "/data/current/comics"}
           ports: [{ containerPort: 5000 }]
           # Mount only the "comics" subfolder from the repo checkout
           volumeMounts:
             - name: repo
-              mountPath: /app/static/comics
-              subPath: repo/comics
+              mountPath: /data
           readinessProbe: { httpGet: { path: "/", port: 5000 }, initialDelaySeconds: 2, periodSeconds: 10 }
           livenessProbe:  { httpGet: { path: "/", port: 5000 }, initialDelaySeconds: 10, periodSeconds: 20 }
           resources:
@@ -38,15 +39,15 @@ spec:
           env:
             - { name: GITSYNC_REPO,  value: "https://github.com/ljunker/comics.git" }
             - { name: GITSYNC_REF, value: "main" }
-            - { name: GITSYNC_ROOT,   value: "/repo" }
-            - { name: GITSYNC_LINK,   value: "repo" }
+            - { name: GITSYNC_ROOT,   value: "/data" }
+            - { name: GITSYNC_LINK,   value: "current" }
             - { name: GITSYNC_PERIOD,   value: "60s" }     # sync every 60s
             - { name: GITSYNC_DEPTH,  value: "1" }
             - { name: GITSYNC_ONE_TIME, value: "false" }
             - { name: GITSYNC_ADD_USER, value: "true" }
           volumeMounts:
             - name: repo
-              mountPath: /repo
+              mountPath: /data
           resources:
             requests: { cpu: 10m, memory: 64Mi }
             limits: { cpu: 200m, memory: 128Mi }
