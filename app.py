@@ -1,7 +1,7 @@
 from __future__ import annotations
 import os
 from pathlib import Path
-from flask import Flask, abort, render_template_string, url_for
+from flask import Flask, abort, render_template_string, url_for, send_from_directory
 
 app = Flask(__name__)
 COMICS_DIR = Path(os.getenv("COMICS_DIR", "static/comics"))
@@ -119,7 +119,8 @@ TEMPLATE = """
 def render_index(i: int):
     comics = list_comics()
     if not comics:
-        return "<h1>No comics yet</h1><p>Put images into <code>static/comics/</code>.</p>"
+        here = COMICS_DIR
+        return f"<h1>No comics yet</h1><p>Put images into <code>{here}</code>.</p>"
     if i < 0 or i >= len(comics):
         abort(404)
     img = comics[i]
@@ -130,7 +131,7 @@ def render_index(i: int):
         "total": len(comics),
         "filename": img.name,
         "title": get_title(img),
-        "img_url": url_for("static", filename=f"comics/{img.name}"),
+        "img_url": url_for("media", name=img.name),   # <- was static/
         "desc": desc,
         "alt_text": alt,
         "first_url": url_for("first"),
@@ -139,6 +140,14 @@ def render_index(i: int):
         "next_url": url_for("by_index", i=i+1) if i < len(comics)-1 else None,
     }
     return render_template_string(TEMPLATE, **ctx)
+
+
+
+@app.get("/media/<path:name>")
+def media(name: str):
+    # Serve from COMICS_DIR (which may be /data/current/comics)
+    # conditional=True enables ETag/If-Modified-Since for efficient caching
+    return send_from_directory(COMICS_DIR, name, conditional=True)
 
 @app.route("/")
 def latest():
