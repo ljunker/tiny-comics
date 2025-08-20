@@ -11,42 +11,42 @@ spec:
       labels:
         app: comics
     spec:
-      # If your storage needs a specific fsGroup to allow writes, set it here
       securityContext:
-        fsGroup: 1000
-      containers:
-        - name: web
-          # Use your image name here (the uv-based image we built earlier)
-          image: tiny-comics:latest
-          imagePullPolicy: IfNotPresent
-          env:
-            - name: PORT
-              value: "5000"
-          ports:
-            - containerPort: 5000
-          volumeMounts:
-            - name: comics
-              mountPath: /app/static/comics
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 5000
-            initialDelaySeconds: 2
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 5000
-            initialDelaySeconds: 10
-            periodSeconds: 20
-          resources:
-            requests:
-              cpu: 50m
-              memory: 128Mi
-            limits:
-              cpu: 500m
-              memory: 512Mi
+        fsGroup: 65533
       volumes:
-        - name: comics
+        - name: repo
           persistentVolumeClaim:
             claimName: comics-pvc
+      containers:
+        - name: web
+          image: tiny-comics:latest
+          imagePullPolicy: IfNotPresent
+          env: [{ name: PORT, value: "5000" }]
+          ports: [{ containerPort: 5000 }]
+          # Mount only the "comics" subfolder from the repo checkout
+          volumeMounts:
+            - name: repo
+              mountPath: /app/static/comics
+              subPath: checkout/comics
+          readinessProbe: { httpGet: { path: "/", port: 5000 }, initialDelaySeconds: 2, periodSeconds: 10 }
+          livenessProbe:  { httpGet: { path: "/", port: 5000 }, initialDelaySeconds: 10, periodSeconds: 20 }
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { cpu: 500m, memory: 512Mi }
+        - name: git-sync
+          image: registry.k8s.io/git-sync/git-sync:v4.3.0
+          env:
+            - { name: GIT_SYNC_REPO,  value: "https://github.com/youruser/your-comics-repo.git" }
+            - { name: GIT_SYNC_BRANCH, value: "main" }
+            - { name: GIT_SYNC_ROOT,   value: "/repo" }
+            - { name: GIT_SYNC_DEST,   value: "checkout" }
+            - { name: GIT_SYNC_WAIT,   value: "60" }     # sync every 60s
+            - { name: GIT_SYNC_DEPTH,  value: "1" }
+            - { name: GIT_SYNC_ONE_TIME, value: "false" }
+          volumeMounts:
+            - name: repo
+              mountPath: /repo
+          resources:
+            requests: { cpu: 10m, memory: 64Mi }
+            limits: { cpu: 200m, memory: 128Mi }
+
