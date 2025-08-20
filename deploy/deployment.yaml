@@ -36,13 +36,13 @@ spec:
         - name: git-sync
           image: registry.k8s.io/git-sync/git-sync:v4.3.0
           env:
-            - { name: GIT_SYNC_REPO,  value: "https://github.com/ljunker/comics.git" }
+            - { name: GITSYNC_REPO,  value: "https://github.com/ljunker/comics.git" }
             - { name: GIT_SYNC_BRANCH, value: "main" }
             - { name: GIT_SYNC_ROOT,   value: "/repo" }
             - { name: GIT_SYNC_DEST,   value: "checkout" }
             - { name: GIT_SYNC_WAIT,   value: "60" }     # sync every 60s
-            - { name: GIT_SYNC_DEPTH,  value: "1" }
-            - { name: GIT_SYNC_ONE_TIME, value: "false" }
+            - { name: GITSYNC_DEPTH,  value: "1" }
+            - { name: GITSYNC_ONE_TIME, value: "false" }
           volumeMounts:
             - name: repo
               mountPath: /repo
