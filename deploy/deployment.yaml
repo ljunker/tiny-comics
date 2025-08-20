@@ -36,7 +36,7 @@ spec:
         - name: git-sync
           image: registry.k8s.io/git-sync/git-sync:v4.3.0
           env:
-            - { name: GIT_SYNC_REPO,  value: "https://github.com/youruser/your-comics-repo.git" }
+            - { name: GIT_SYNC_REPO,  value: "https://github.com/ljunker/comics.git" }
             - { name: GIT_SYNC_BRANCH, value: "main" }
             - { name: GIT_SYNC_ROOT,   value: "/repo" }
             - { name: GIT_SYNC_DEST,   value: "checkout" }
