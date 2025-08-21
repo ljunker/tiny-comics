@@ -81,7 +81,6 @@ TEMPLATE = """
       {% if desc %}
         <div class="desc">{{ desc | replace('\\n','<br>') | safe }}</div>
       {% endif %}
-      <div class="meta">File: {{ filename }}</div>
     </div>
 
     <nav class="grid" aria-label="pagination bottom" style="margin-top:14px;">
@@ -131,7 +130,7 @@ def render_index(i: int):
         "total": len(comics),
         "filename": img.name,
         "title": get_title(img),
-        "img_url": url_for("media", name=img.name),   # <- was static/
+        "img_url": url_for("media", name=img.name),
         "desc": desc,
         "alt_text": alt,
         "first_url": url_for("first"),
